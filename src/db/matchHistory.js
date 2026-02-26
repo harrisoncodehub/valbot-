@@ -1,5 +1,6 @@
 'use strict';
 const supabase = require('./supabase');
+const logger = require('../utils/logger').child({ module: 'match-history-db' });
 
 /**
  * Upsert a single match record into match_history.
@@ -10,7 +11,7 @@ async function upsertMatch(data) {
   const { error } = await supabase
     .from('match_history')
     .upsert(data, { onConflict: 'match_id,discord_id', ignoreDuplicates: true });
-  if (error) console.error('[matchHistory] upsertMatch error:', error.message);
+  if (error) logger.error({ err: error.message }, 'upsertMatch error');
 }
 
 /**
@@ -27,7 +28,7 @@ async function getMatchHistory(discordId, limit = 10) {
     .order('recorded_at', { ascending: false })
     .limit(limit);
   if (error) {
-    console.error('[matchHistory] getMatchHistory error:', error.message);
+    logger.error({ err: error.message, discordId }, 'getMatchHistory error');
     return [];
   }
   return data || [];

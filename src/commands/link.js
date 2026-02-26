@@ -1,6 +1,7 @@
 const henrik = require("../api/henrik");
 const storage = require("../storage/links");
 const { createLinkEmbed, createErrorEmbed } = require("../utils/embeds");
+const logger = require("../utils/logger").child({ module: "link-command" });
 
 /**
  * Handle /link command
@@ -42,7 +43,7 @@ async function execute(interaction) {
 
     await interaction.editReply({ embeds: [embed] });
   } catch (error) {
-    console.error("Error in /link command:", error);
+    logger.error({ err: error }, "Error in /link command");
     await interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to link account. Please try again.")],
     });

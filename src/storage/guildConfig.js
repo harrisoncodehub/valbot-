@@ -1,5 +1,6 @@
 'use strict';
 const supabase = require('../db/supabase');
+const logger = require('../utils/logger').child({ module: 'guild-config-storage' });
 
 /**
  * Map a DB row to camelCase config object.
@@ -28,7 +29,7 @@ async function getGuildConfig(guildId) {
     .eq('guild_id', guildId)
     .maybeSingle();
   if (error) {
-    console.error('[guildConfig] getGuildConfig error:', error.message);
+    logger.error({ err: error.message, guildId }, 'getGuildConfig error');
     return null;
   }
   if (!data) return null;
@@ -91,7 +92,7 @@ async function setGuildConfig(guildId, patch) {
     .single();
 
   if (error) {
-    console.error('[guildConfig] setGuildConfig error:', error.message);
+    logger.error({ err: error.message, guildId }, 'setGuildConfig error');
     throw error;
   }
 
@@ -105,7 +106,7 @@ async function setGuildConfig(guildId, patch) {
 async function getAllGuildConfigs() {
   const { data, error } = await supabase.from('guild_configs').select('*');
   if (error) {
-    console.error('[guildConfig] getAllGuildConfigs error:', error.message);
+    logger.error({ err: error.message }, 'getAllGuildConfigs error');
     return {};
   }
   const result = {};

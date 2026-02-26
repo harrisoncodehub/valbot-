@@ -1,5 +1,6 @@
 const { fetchProgressRows } = require("../utils/rankProgress");
 const { createProgressEmbed, createErrorEmbed } = require("../utils/embeds");
+const logger = require("../utils/logger").child({ module: "weekly-command" });
 
 async function execute(interaction) {
   await interaction.deferReply();
@@ -31,7 +32,7 @@ async function execute(interaction) {
     );
     return interaction.editReply({ embeds: [embed] });
   } catch (error) {
-    console.error("Error in /weekly:", error);
+    logger.error({ err: error }, "Error in /weekly");
     return interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to build weekly progress.")],
     });

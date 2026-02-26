@@ -1,5 +1,6 @@
 'use strict';
 const supabase = require('../db/supabase');
+const logger = require('../utils/logger').child({ module: 'last-matches-storage' });
 
 /**
  * @param {string} guildId
@@ -14,7 +15,7 @@ async function getLastMatchId(guildId, discordId) {
     .eq('discord_id', discordId)
     .maybeSingle();
   if (error) {
-    console.error('[lastMatches] getLastMatchId error:', error.message);
+    logger.error({ err: error.message, guildId, discordId }, 'getLastMatchId error');
     return null;
   }
   return data?.last_match_id || null;
@@ -36,7 +37,7 @@ async function setLastMatchId(guildId, discordId, matchId) {
     { onConflict: 'guild_id,discord_id' }
   );
   if (error) {
-    console.error('[lastMatches] setLastMatchId error:', error.message);
+    logger.error({ err: error.message, guildId, discordId }, 'setLastMatchId error');
     // non-fatal — poller continues
   }
 }
