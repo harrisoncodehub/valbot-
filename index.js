@@ -63,6 +63,18 @@ client.on("interactionCreate", async (interaction) => {
       await command.execute(interaction);
     }
 } catch (error) {
+    if (error?.code === 10062) {
+      logger.warn(
+        {
+          code: error.code,
+          commandName: interaction.commandName,
+          interactionId: interaction.id,
+        },
+        "Ignoring expired or unknown interaction"
+      );
+      return;
+    }
+
     logger.error({ err: error }, "Interaction handler error");
     try {
       const msg = { content: "Something went wrong.", ephemeral: true };
