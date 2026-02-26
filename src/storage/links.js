@@ -1,5 +1,6 @@
 'use strict';
 const supabase = require('../db/supabase');
+const logger = require('../utils/logger').child({ module: 'links-storage' });
 
 /**
  * Get a user's linked account.
@@ -13,7 +14,7 @@ async function getLink(discordId) {
     .eq('discord_id', discordId)
     .maybeSingle();
   if (error) {
-    console.error('[links] getLink error:', error.message);
+    logger.error({ err: error.message, discordId }, 'getLink error');
     return null;
   }
   if (!data) return null;
@@ -67,7 +68,7 @@ async function setLink(discordId, data) {
     .from('user_links')
     .upsert(row, { onConflict: 'discord_id' });
   if (error) {
-    console.error('[links] setLink error:', error.message);
+    logger.error({ err: error.message, discordId }, 'setLink error');
     throw error;
   }
 }
@@ -84,7 +85,7 @@ async function removeLink(discordId) {
     .eq('discord_id', discordId)
     .select('discord_id');
   if (error) {
-    console.error('[links] removeLink error:', error.message);
+    logger.error({ err: error.message, discordId }, 'removeLink error');
     return false;
   }
   return Array.isArray(data) && data.length > 0;
@@ -102,7 +103,7 @@ async function getAllLinks(guildId = null) {
   }
   const { data, error } = await query;
   if (error) {
-    console.error('[links] getAllLinks error:', error.message);
+    logger.error({ err: error.message, guildId }, 'getAllLinks error');
     return [];
   }
   return (data || []).map((row) => ({

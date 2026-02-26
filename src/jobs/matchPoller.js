@@ -5,6 +5,7 @@ const lastMatches = require("../storage/lastMatches");
 const cache = require("../cache/cache");
 const { createMatchPostEmbed } = require("../utils/embeds");
 const matchHistory = require("../db/matchHistory");
+const logger = require("../utils/logger").child({ module: "match-poller" });
 
 const DEFAULT_INTERVAL_MS = 5 * 60 * 1000; // 5 min
 const CHANNEL_POST_LIMIT = 5;
@@ -119,7 +120,7 @@ function startMatchPoller(client, opts = {}) {
         try {
           channel = await client.channels.fetch(channelId);
         } catch (e) {
-          console.warn(`[Poller] Could not fetch channel ${channelId}:`, e.message);
+          logger.warn({ channelId, err: e.message }, "Could not fetch match post channel");
           continue;
         }
         if (!channel || typeof channel.send !== "function") continue;
@@ -135,7 +136,7 @@ function startMatchPoller(client, opts = {}) {
           try {
             match = await fetchLatestCompetitive(region, name, tag);
           } catch (e) {
-            console.warn(`[Poller] match fetch failed for ${name}#${tag}:`, e.message);
+            logger.warn({ player: `${name}#${tag}`, err: e.message }, "Match fetch failed");
             continue;
           }
 
@@ -171,7 +172,7 @@ function startMatchPoller(client, opts = {}) {
           summary.discordName = discordName;
 
           if (!limiter.canPost(channelId)) {
-            console.warn(`[Poller] Channel ${channelId} post limit reached, skipping.`);
+            logger.warn({ channelId }, "Channel post limit reached, skipping match post");
             await lastMatches.setLastMatchId(guildId, discordId, matchId);
             continue;
           }
@@ -201,12 +202,12 @@ function startMatchPoller(client, opts = {}) {
               rr_change: summary.rrChange ?? null,
             }).catch(() => {});
           } catch (e) {
-            console.warn(`[Poller] Failed to send match post:`, e.message);
+            logger.warn({ channelId, err: e.message }, "Failed to send match post");
           }
         }
       }
     } catch (e) {
-      console.error("[Poller] Tick error:", e);
+      logger.error({ err: e }, "Poller tick error");
     } finally {
       running = false;
     }

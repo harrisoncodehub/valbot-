@@ -3,6 +3,7 @@ const storage = require("../storage/links");
 const cache = require("../cache/cache");
 const { createProfileEmbed, createErrorEmbed } = require("../utils/embeds");
 const { getAgentIconUrl } = require("../utils/agentAssets");
+const logger = require("../utils/logger").child({ module: "profile-command" });
 
 /**
  * Handle /profile command
@@ -116,7 +117,7 @@ async function execute(interaction) {
 
     await interaction.editReply({ embeds: [embed] });
   } catch (error) {
-    console.error("Error in /profile command:", error);
+    logger.error({ err: error }, "Error in /profile command");
     await interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to fetch profile. Please try again.")],
     });

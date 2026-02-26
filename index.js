@@ -2,6 +2,7 @@ require("dotenv").config({ quiet: true });
 const { Client, Intents } = require("discord.js");
 const { checkLimits } = require("./src/utils/rateLimit");
 const { startMatchPoller } = require("./src/jobs/matchPoller");
+const logger = require("./src/utils/logger").child({ module: "bot" });
 
 // Import commands
 const linkCommand = require("./src/commands/link");
@@ -27,9 +28,9 @@ commands.set("daily", dailyCommand);
 commands.set("weekly", weeklyCommand);
 
 client.once("ready", (c) => {
-  console.log(`✅ Logged in as ${c.user.tag}`);
+  logger.info({ userTag: c.user.tag }, "Discord client ready");
   startMatchPoller(client);
-  console.log("🕒 Match poller started");
+  logger.info("Match poller started");
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -42,7 +43,7 @@ client.on("interactionCreate", async (interaction) => {
   try {
     // Handle ping command separately (no rate limit)
     if (interaction.commandName === "ping") {
-      console.log("Received /ping, replying...");
+      logger.debug({ commandName: "ping" }, "Handling ping command");
       await interaction.reply("pong 🏓");
       return;
     }
@@ -62,7 +63,7 @@ client.on("interactionCreate", async (interaction) => {
       await command.execute(interaction);
     }
 } catch (error) {
-    console.error("Interaction error:", error);
+    logger.error({ err: error }, "Interaction handler error");
     try {
       const msg = { content: "Something went wrong.", ephemeral: true };
       if (interaction.replied || interaction.deferred) {
@@ -71,14 +72,14 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.reply(msg).catch(() => {});
       }
     } catch (e) {
-      console.error("Failed to send error reply:", e);
+      logger.error({ err: e }, "Failed to send interaction error reply");
     }
   }
 });
 
-console.log("🔄 Starting bot...");
+logger.info("Starting bot");
 
 client.login(process.env.DISCORD_TOKEN).catch((error) => {
-  console.error("❌ Failed to login:", error);
+  logger.error({ err: error }, "Failed to login to Discord");
   process.exit(1);
 });

@@ -1,5 +1,6 @@
 const { fetchProgressRows } = require("../utils/rankProgress");
 const { createProgressEmbed, createErrorEmbed } = require("../utils/embeds");
+const logger = require("../utils/logger").child({ module: "daily-command" });
 
 async function execute(interaction) {
   await interaction.deferReply();
@@ -31,7 +32,7 @@ async function execute(interaction) {
     );
     return interaction.editReply({ embeds: [embed] });
   } catch (error) {
-    console.error("Error in /daily:", error);
+    logger.error({ err: error }, "Error in /daily");
     return interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to build daily progress.")],
     });

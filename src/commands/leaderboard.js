@@ -2,6 +2,7 @@ const henrik = require("../api/henrik");
 const links = require("../storage/links");
 const cache = require("../cache/cache");
 const { createLeaderboardEmbed, createErrorEmbed } = require("../utils/embeds");
+const logger = require("../utils/logger").child({ module: "leaderboard-command" });
 
 async function mapLimit(items, limit, fn) {
   const results = new Array(items.length);
@@ -136,7 +137,7 @@ async function execute(interaction) {
         }
       }
     } catch (e) {
-      console.warn("[leaderboard] Could not bulk-fetch guild members:", e.message);
+      logger.warn({ err: e.message }, "Could not bulk-fetch guild members");
     }
 
     const annotatedTop = top.map((r) => ({
@@ -147,7 +148,7 @@ async function execute(interaction) {
     const embed = createLeaderboardEmbed(interaction.guild, annotatedTop);
     return interaction.editReply({ embeds: [embed] });
   } catch (error) {
-    console.error("Error in /leaderboard:", error);
+    logger.error({ err: error }, "Error in /leaderboard");
     return interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to build leaderboard.")],
     });
@@ -169,4 +170,3 @@ module.exports = {
   ],
   execute,
 };
-

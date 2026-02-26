@@ -4,6 +4,7 @@ const cache = require("../cache/cache");
 const { createHistoryEmbed, createErrorEmbed } = require("../utils/embeds");
 const { getAgentIconUrl } = require("../utils/agentAssets");
 const matchHistory = require("../db/matchHistory");
+const logger = require("../utils/logger").child({ module: "history-command" });
 
 /**
  * Handle /history command
@@ -51,7 +52,7 @@ async function execute(interaction) {
     try {
       mmrHistory = await henrik.getMMRHistory(region, name, tag);
     } catch (e) {
-      console.log("Could not fetch MMR history:", e.message);
+      logger.warn({ err: e.message, player: `${name}#${tag}` }, "Could not fetch MMR history");
     }
 
     // Create a map of match_id -> rr_change for quick lookup
@@ -142,7 +143,7 @@ async function execute(interaction) {
       })
     ).catch(() => {});
   } catch (error) {
-    console.error("Error in /history command:", error);
+    logger.error({ err: error }, "Error in /history command");
     await interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to fetch match history. Please try again.")],
     });

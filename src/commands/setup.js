@@ -1,6 +1,7 @@
 const { Permissions } = require("discord.js");
 const guildConfig = require("../storage/guildConfig");
 const { createErrorEmbed } = require("../utils/embeds");
+const logger = require("../utils/logger").child({ module: "setup-command" });
 
 const MODULES = [
   { name: "Match posts", value: "match_posts" },
@@ -96,7 +97,7 @@ async function execute(interaction) {
       embeds: [createErrorEmbed("Unknown setup subcommand.")],
     });
   } catch (error) {
-    console.error("Error in /setup:", error);
+    logger.error({ err: error }, "Error in /setup");
     return interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to update setup.")],
     });
@@ -161,4 +162,3 @@ module.exports = {
   ],
   execute,
 };
-

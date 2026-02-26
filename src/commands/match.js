@@ -3,6 +3,7 @@ const storage = require("../storage/links");
 const cache = require("../cache/cache");
 const { createMatchEmbed, createErrorEmbed } = require("../utils/embeds");
 const matchHistory = require("../db/matchHistory");
+const logger = require("../utils/logger").child({ module: "match-command" });
 
 /**
  * Handle /match command
@@ -107,7 +108,7 @@ async function execute(interaction) {
       rr_change: null,
     }).catch(() => {});
   } catch (error) {
-    console.error("Error in /match command:", error);
+    logger.error({ err: error }, "Error in /match command");
     await interaction.editReply({
       embeds: [createErrorEmbed(error.message || "Failed to fetch match details. Please try again.")],
     });

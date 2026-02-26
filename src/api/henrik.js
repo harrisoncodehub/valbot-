@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const logger = require("../utils/logger").child({ module: "henrik-api" });
 
 const BASE_URL = "https://api.henrikdev.xyz";
 
@@ -164,7 +165,7 @@ async function getMatches(region, name, tag, size = 5, mode = "competitive") {
     url += `&filter=${encodeURIComponent(mode)}`;
   }
   
-  console.log(`[Henrik API] Fetching: ${url}`);
+  logger.debug({ url, mode, size, requestSize }, "Fetching match history from Henrik API");
 
   let data;
   try {
@@ -181,10 +182,13 @@ async function getMatches(region, name, tag, size = 5, mode = "competitive") {
   if (mode && matches && Array.isArray(matches)) {
     const filtered = matches.filter((match) => {
       const matchMode = match.metadata?.mode?.toLowerCase();
-      console.log(`[Henrik API] Match mode: ${matchMode}`);
+      logger.debug({ matchMode }, "Henrik match mode (filter check)");
       return matchMode === mode.toLowerCase();
     });
-    console.log(`[Henrik API] Filtered ${matches.length} matches to ${filtered.length} ${mode} matches`);
+    logger.debug(
+      { before: matches.length, after: filtered.length, mode },
+      "Filtered matches client-side"
+    );
     return filtered.slice(0, size);
   }
   
